@@ -1,0 +1,86 @@
+---
+title: 'Projet: Reconnaissance faciale'
+author: "Sébastien Vingadessin"
+date: "21/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lecture des données
+`
+
+### Liste des fichiers d'images de référence
+```{r}
+ref<-list.files(path = "./referenceFaceData",full.names=TRUE)
+#ref
+```
+
+### Chargement de la librairie pixmap
+```{r}
+library(pixmap)
+```
+
+### Lecture des fichier d'images de référence
+```{r}
+imgRef=lapply(ref,read.pnm)
+#lapply(imgRef,plot)
+```
+
+### Liste des matrices des images de référence
+```{r}
+imgRefMat=lapply(imgRef,function(x){x@grey[0:100,0:90]})
+```
+
+### Conversion des matrices d'images de référence en vecteurs
+```{r}
+imgRefVector=lapply(imgRefMat,function(x){as.vector(t(x))})
+#length(imgRefVector[[1]])
+```
+### Construction de la matrice dont les lignes sont les vecteurs de imgRefVector
+```{r}
+imgRefMatPCA=t(sapply(imgRefVector,rbind))
+```
+### Noms des lignes de la matrice imgRefMatPCA
+```{r}
+rownames(imgRefMatPCA)=lapply(1:nrow(imgRefMatPCA),function(x){v=paste("r",x)})
+imgRefMatPCA[,1:5]
+```
+### Liste des fichiers d'images test
+```{r}
+test<-list.files(path = "./testFaceData",full.names=TRUE)
+test
+```
+### Lecture des fichier d'images test
+```{r}
+imgTest=lapply(test,read.pnm)
+#lapply(imgTest,plot)
+```
+### Liste des matrices des images test
+```{r}
+imgTestMat=lapply(imgTest,function(x){x@grey[0:100,0:90]})
+```
+### Conversion des matrices d'images test en vecteurs
+```{r}
+imgTestVector=lapply(imgTestMat,function(x){as.vector(t(x))})
+```
+# Construction de la matrice dont les lignes sont les vecteurs de imgTestVector
+```{r}
+imgTestMatPCA=t(sapply(imgTestVector,rbind))
+```
+### Noms des lignes de la matrice imgTestMatPCA
+```{r}
+rownames(imgTestMatPCA)=lapply(1:nrow(imgTestMatPCA),function(x){v=paste("t",x)})
+```
+### Construction de la matrice de données contenant les vecteurs visages de référence et vecteurs visages test
+```{r}
+donnees<- rbind(imgRefMatPCA, imgTestMatPCA)
+dim(donnees)
+```
+
+
+## ACP
+
+
