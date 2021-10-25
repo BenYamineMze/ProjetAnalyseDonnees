@@ -125,22 +125,27 @@ pInexp(Vp)
 planFact<-function(tab){
   k<-4
   res<-c()
-  #imaget1
   ij<-c(0,0)
-  max<-0
-  for(i in 1:k){
-    for(j in 1:k){
-      if(j>i){
-        if(tab[11,i]+tab[11,j] > max){
-          max = tab[11,i]+tab[11,j]
-          ij=c(i,j)
+  
+  for(n in 1:5){
+    max<-0
+    for(i in 1:k){
+      for(j in 1:k){
+        if(j>i){
+          if(tab[10+n,i]+tab[10+n,j] > max){
+            max = tab[10+n,i]+tab[10+n,j]
+            ij=c(i,j)
+          }
         }
       }
     }
+    res = c(res,ij,(Vp[ij[1]]+Vp[ij[2]])/sum(Vp))
   }
-  res = c(res,ij)
   
-  return(res)
+  M<-matrix(res,ncol = 5)
+  rownames(M)=c("dim1","dim2","%inertie")
+  colnames(M)=c("image 1","image 2","image 3","image 4","image 5")
+  return(M)
 }
 
 
@@ -149,6 +154,24 @@ planFact<-function(tab){
 
 ```{r}
 cos<-acp$ind$cos2
-planFact(cos)
+planF<-planFact(cos)
+planF
+```
+
+2.d  
+
+
+```{r}
+coor<-acp$ind$coord
+
+for(p in 1:5){
+  x<-coor[,planF[1,p]]
+  x=c(x[1:10],coor[10+p,planF[1,p]])
+  y<-coor[,planF[2,p]]
+  y=c(y[1:10],coor[10+p,planF[2,p]])
+  
+  plot(x,y,type = "p")
+}
+
 ```
 
