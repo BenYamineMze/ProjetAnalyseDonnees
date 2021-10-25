@@ -83,4 +83,12 @@ dim(donnees)
 
 ## ACP
 
+```{r}
+library(FactoMineR)
+```
+
+```{r}
+PCA(donnees, scale.unit = FALSE)
+```
+
 
