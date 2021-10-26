@@ -88,13 +88,14 @@ library(FactoMineR)
 ```
 
 ```{r}
-acp<-PCA(donnees, scale.unit = FALSE)
+acp<-PCA(donnees, scale.unit = FALSE, ncp = Inf)
 ```
   
   
 2.a
 
 ```{r}
+#Valeurs propres données par l'ACP
 Vp<-acp$eig[,1]
 ```
 
@@ -105,7 +106,8 @@ kaiser<-function(valP){
   return(res)
 }
 
-kaiser(Vp)
+k<-kaiser(Vp)
+k
 ```
 
 2.b
@@ -113,7 +115,7 @@ kaiser(Vp)
 ```{r}
 pInexp<-function(valP){
   In<-sum(valP)
-  return(sum(valP[1:kaiser(valP)])*100/In)
+  return(sum(valP[1:k])*100/In)
 }
 
 pInexp(Vp)
@@ -123,7 +125,6 @@ pInexp(Vp)
 
 ```{r}
 planFact<-function(tab){
-  k<-4
   res<-c()
   ij<-c(0,0)
   
@@ -173,5 +174,81 @@ for(p in 1:5){
   plot(x,y,type = "p")
 }
 
+```
+
+2.e
+
+```{r}
+
+mou<-matrix(c(1:5,rep(0,5)),ncol = 2)
+colnames(mou) = c("test","ref")
+
+
+num<-0
+dmin<-100
+m<-matrix(c(1:(2*k)),nrow=2)
+m[1,]=coor[11,1:k]
+
+for(i in 1:10){
+  m[2,]=coor[i,1:k]
+  if(dist(m,method = "euclidean") < dmin) {
+    dmin = dist(m,method = "euclidean")
+    num = i
+  }
+}
+
+mou[1,2] = num
+
+mou
+```
+
+```{r}
+distTest<-function(cord){
+  res<-matrix(c(1:5,rep(0,5)),ncol = 2)
+  colnames(res) = c("test","ref")
+  
+  #image test t
+  
+  for(t in 1:5){
+    num<-0
+    dmin<-1000000
+    m<-matrix(c(1:(2*k)),nrow=2)
+    m[1,]=cord[10+t,1:k]
+    
+    for(i in 1:10){
+      m[2,]=cord[i,1:k]
+      if(dist(m,method = "euclidean") < dmin) {
+        dmin = dist(m,method = "euclidean")
+        num = i
+      }
+    }
+    
+    res[t,2] = num
+  }
+  
+  return(res)
+}
+
+distTest(coor)
+```
+
+
+2.f
+
+```{r}
+identif<-function(cord){
+  tab<-distTest(cord)
+  
+  for(i in 1:5){
+    lapply(imgTest[i],plot)
+    lapply(imgRef[tab[i,2]],plot)
+  }
+}
+```
+
+
+
+```{r}
+identif(coor)
 ```
 
