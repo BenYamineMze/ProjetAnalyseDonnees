@@ -82,23 +82,26 @@ dim(donnees)
 
 
 ## 2. ACP
-
+# Chargement de la library FactoMineR
 ```{r}
 library(FactoMineR)
 ```
-
+# Construction de l'ACP paar la matrice des donnees des vacteur des visage de reference et des visages test
 ```{r}
 acp<-PCA(donnees, scale.unit = FALSE, ncp = Inf)
 ```
   
   
-2.a
+# 2.a 
 
 ```{r}
 #Valeurs propres données par l'ACP
 Vp<-acp$eig[,1]
 ```
 
+# Kaiser est une fonction qui calcule le nombre d'axes factoriels
+# il prend en paramettre les valeurs propres des donnees recu par l'ACP
+# Et retourne le nombre d'axes factoriels
 ```{r}
 kaiser<-function(valP){
   Imoy<-sum(valP)/length(valP)
@@ -110,7 +113,10 @@ k<-kaiser(Vp)
 k
 ```
 
-2.b
+# 2.b
+# pInexp est une fonction qui determine le pourcentage d'inertie
+# Il prend en parametre les valeurs propres des donnees recu par l'ACP
+# Et retourne le pourcentage d'inertie sous l'espace factoriel qui est retenu par l'application de la fonction Kaiser vue precedement.
 
 ```{r}
 pInexp<-function(valP){
@@ -121,7 +127,10 @@ pInexp<-function(valP){
 pInexp(Vp)
 ```
 
-2.c
+# 2.c
+# La fonction planFact determine le plan factoriel sur lequel le visage test est le mieux presenté , ainsi que le pourcentage d'inertie
+# Il prend en parametre les valeurs de l'ACP
+# Il retourne une matrice et kes pourcentage d'inetie
 
 ```{r}
 planFact<-function(tab){
@@ -152,15 +161,18 @@ planFact<-function(tab){
 
 ```
 
-
+# construction de l'acp des image teste 
+# Applicationd de la fontion PlanF definit precedement 
 ```{r}
 cos<-acp$ind$cos2
 planF<-planFact(cos)
 planF
 ```
 
-2.d  
-
+# 2.d  
+# coor est une fonction qui represente pour chaque visage test l'ensemble des visages references et e visage test sur le plan 
+# x :
+# y : 
 
 ```{r}
 coor<-acp$ind$coord
