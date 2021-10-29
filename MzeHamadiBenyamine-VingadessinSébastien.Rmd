@@ -1,6 +1,6 @@
 ---
-title: 'Projet: Reconnaissance faciale'
-author: "Sébastien Vingadessin (36008909) et Ben yamine Mze Hamadi"
+title: 'Analyse de données - Projet: Reconnaissance faciale'
+author: "Sébastien Vingadessin (36008909) et Ben yamine Mze Hamadi (40008924)"
 date: "21/10/2021"
 output: html_document
 ---
