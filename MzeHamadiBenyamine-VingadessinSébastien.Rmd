@@ -87,7 +87,7 @@ dim(donnees)
 ```{r}
 library(FactoMineR)
 ```
-# Construction de l'ACP par la matrice des données des vecteurs des visages de référence et des visages test
+# Construction de l'ACP par la matrice des données des vecteurs des visages de référence et des visages tests
 ```{r}
 acp<-PCA(donnees, scale.unit = FALSE, ncp = Inf)
 ```
@@ -100,9 +100,9 @@ acp<-PCA(donnees, scale.unit = FALSE, ncp = Inf)
 Vp<-acp$eig[,1]
 ```
 
-# Kaiser est une fonction qui calcule le nombre d'axes factoriels
-# il prend en paramettre les valeurs propres des donnees recu par l'ACP
-# Et retourne le nombre d'axes factoriels
+# kaiser est une fonction qui calcule le nombre d'axes factoriels
+# Elle prend en paramètre les valeurs propres des données reçues par l'ACP
+# et renvoie le nombre d'axes factoriels
 ```{r}
 kaiser<-function(valP){
   Imoy<-sum(valP)/length(valP)
@@ -114,10 +114,11 @@ k<-kaiser(Vp)
 k
 ```
 
-# 2.b
-# pInexp est une fonction qui determine le pourcentage d'inertie
-# Il prend en parametre les valeurs propres des donnees recu par l'ACP
-# Et retourne le pourcentage d'inertie sous l'espace factoriel qui est retenu par l'application de la fonction Kaiser vue precedement.
+## Question 2.b (Sébastien Vingadessin)
+
+# La fonction pInexp détermine le pourcentage d'inertie expliqué
+# Elle prend en paramètre les valeurs propres des données reçues par l'ACP
+# Et renvoie le pourcentage d'inertie expliqué sous l'espace factoriel retenu par l'application de la fonction Kaiser vue précédemment.
 
 ```{r}
 pInexp<-function(valP){
@@ -128,10 +129,12 @@ pInexp<-function(valP){
 pInexp(Vp)
 ```
 
-# 2.c
-# La fonction planFact determine le plan factoriel sur lequel le visage test est le mieux presenté , ainsi que le pourcentage d'inertie
-# Il prend en parametre les valeurs de l'ACP
-# Il retourne une matrice et kes pourcentage d'inetie
+
+## Question 2.c (Ben yamine Mze Hamadi)
+
+# La fonction planFact détermine le plan factoriel sur lequel le visage test est le mieux représenté, ainsi que le pourcentage d'inertie.
+# Elle prend en paramètre les valeurs de l'ACP.
+# Elle renvoie une matrice présentant les dimensions des plans factoriels retenus ainsi que les pourcentages d'inertie expliquée par le plan en question.
 
 ```{r}
 planFact<-function(tab){
@@ -162,18 +165,16 @@ planFact<-function(tab){
 
 ```
 
-# construction de l'acp des image teste 
-# Applicationd de la fontion PlanF definit precedement 
+# Application de la fontion PlanF définie précédemment 
 ```{r}
 cos<-acp$ind$cos2
 planF<-planFact(cos)
 planF
 ```
 
-# 2.d  
-# coor est une fonction qui represente pour chaque visage test l'ensemble des visages references et e visage test sur le plan 
-# x :
-# y : 
+
+## Question 2.d (Sébastien Vingadessin) 
+ 
 
 ```{r}
 coor<-acp$ind$coord
@@ -189,7 +190,9 @@ for(p in 1:5){
 
 ```
 
-2.e
+
+
+## Question 2.e (Sébastien Vingadessin)
 
 
 ```{r}
@@ -223,7 +226,7 @@ distTest(coor)
 ```
 
 
-2.f
+## Question 2.f (Ben yamine Mze Hamadi)
 
 ```{r}
 identif<-function(cord){
@@ -244,10 +247,114 @@ identif(coor)
 
 
 
-3.
+## Question 3. (Ben yamine Mze Hamadi)
+
 
 ```{r}
+#Nuage de point projeté
+nuage<-coor[,1:4]
 
+#Matrice des dissimilarités du nuage, selon la distance euclidienne
+d<-dist(nuage, method = "euclidean")
+d
+```
+
+```{r}
+#CAH par le lien simple
+h<-hclust(d, method = "single", members = NULL)
+plot(h)
+```
+
+
+
+```{r}
+listClass<-function(cah){
+  mg<-cah$merge
+  lab<-cah$labels
+  res<-list()
+  
+  comp1<-NULL
+  comp2<-NULL
+  
+  for(i in 1:14){
+    
+    if(mg[i,1]<0) comp1 = lab[-mg[i,1]]
+    else comp1 = res[[mg[i,1]]]
+    
+    if(mg[i,2]<0) comp2 = lab[-mg[i,2]]
+    else comp2 = res[[mg[i,2]]]
+    
+    res[[i]] = c(comp1,comp2)
+  }
+  
+  return(res)
+}
+```
+
+
+```{r}
+Lclass<-listClass(h)
+
+Lclass
+```
+
+
+
+## Question 4. (Sébastien Vingadessin) 
+
+```{r}
+pluspetiteClasse<-function(listC){
+  res<-list("0","0","0","0","0")
+  lab<-h$labels
+  class<-NULL
+  for(t in 1:5){
+    
+    for(i in 1:14){
+      class=listC[[i]]
+      
+      for(j in 1:length(class)){
+        if(class[j] == lab[t+10]){
+          res[[t]] = class
+          break
+        }
+      }
+      if(length(res[[t]]) > 1) break
+    }
+    
+  }
+  return(res)
+}
+
+testClass<-pluspetiteClasse(Lclass)
+testClass
+```
+
+
+
+## Question 5 (Ben yamine Mze Hamadi et Sébastien Vingadessin)
+
+```{r}
+visageClasse<-function(tClass){
+  allImg<-c(imgRef,imgTest)
+  class<-NULL
+  
+  for(i in 1:5){
+    class=tClass[[i]]
+    
+    for(j in 1:length(class)){
+      im<-class[j]
+      for(p in 1:15){
+        if(im == h$labels[p]){
+          lapply(allImg[p],plot)
+          break
+        }
+      }
+    }
+    
+  }
+}
+
+visageClasse(testClass)
 ```
 
 
