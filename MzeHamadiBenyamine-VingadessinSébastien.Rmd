@@ -15,7 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Liste des fichiers d'images de référence
 ```{r}
 ref<-list.files(path = "./referenceFaceData",full.names=TRUE)
-#ref
 ```
 
 ### Chargement de la librairie pixmap
@@ -26,7 +25,6 @@ library(pixmap)
 ### Lecture des fichier d'images de référence
 ```{r}
 imgRef=lapply(ref,read.pnm)
-#lapply(imgRef,plot)
 ```
 
 ### Liste des matrices des images de référence
@@ -66,7 +64,7 @@ imgTestMat=lapply(imgTest,function(x){x@grey[0:100,0:90]})
 ```{r}
 imgTestVector=lapply(imgTestMat,function(x){as.vector(t(x))})
 ```
-# Construction de la matrice dont les lignes sont les vecteurs de imgTestVector
+### Construction de la matrice dont les lignes sont les vecteurs de imgTestVector
 ```{r}
 imgTestMatPCA=t(sapply(imgTestVector,rbind))
 ```
@@ -83,26 +81,27 @@ dim(donnees)
 
 ## Question 2. ACP
 
-# Chargement de la librairie FactoMineR
+### Chargement de la librairie FactoMineR
 ```{r}
 library(FactoMineR)
 ```
-# Construction de l'ACP par la matrice des données des vecteurs des visages de référence et des visages tests
+### Construction de l'ACP par la matrice des données des vecteurs des visages de référence et des visages tests
 ```{r}
 acp<-PCA(donnees, scale.unit = FALSE, ncp = Inf)
 ```
   
   
 ## Question 2.a (Ben yamine Mze Hamadi)
+### Fonction calculant le nombre k d’axes factoriels, suggéré par le critère de Kaiser
 
 ```{r}
 #Valeurs propres données par l'ACP
 Vp<-acp$eig[,1]
 ```
 
-# kaiser est une fonction qui calcule le nombre d'axes factoriels
-# Elle prend en paramètre les valeurs propres des données reçues par l'ACP
-# et renvoie le nombre d'axes factoriels
+kaiser est une fonction qui calcule le nombre d'axes factoriels suggéré par le critère de Kaiser.
+Elle prend en paramètre les valeurs propres des données reçues par l'ACP et renvoie un entier.
+
 ```{r}
 kaiser<-function(valP){
   Imoy<-sum(valP)/length(valP)
@@ -115,10 +114,11 @@ k
 ```
 
 ## Question 2.b (Sébastien Vingadessin)
+### Fonction déterminant le pourcentage d’inertie expliquée par le sous-espace factoriel Ek retenu
 
-# La fonction pInexp détermine le pourcentage d'inertie expliqué
-# Elle prend en paramètre les valeurs propres des données reçues par l'ACP
-# Et renvoie le pourcentage d'inertie expliqué sous l'espace factoriel retenu par l'application de la fonction Kaiser vue précédemment.
+La fonction pInexp détermine le pourcentage d'inertie expliqué.
+Elle prend en paramètre les valeurs propres des données reçues par l'ACP.
+Et renvoie le pourcentage d'inertie expliqué sous l'espace factoriel retenu par l'application de la fonction Kaiser vue précédemment.
 
 ```{r}
 pInexp<-function(valP){
@@ -131,10 +131,11 @@ pInexp(Vp)
 
 
 ## Question 2.c (Ben yamine Mze Hamadi)
+### Fonction qui, pour chaque visage test, détermine le plan factoriel P sur lequel le visage test est mieux représenté, ainsi que le pourcentage d’inertie expliquée par P
 
-# La fonction planFact détermine le plan factoriel sur lequel le visage test est le mieux représenté, ainsi que le pourcentage d'inertie.
-# Elle prend en paramètre les valeurs de l'ACP.
-# Elle renvoie une matrice présentant les dimensions des plans factoriels retenus ainsi que les pourcentages d'inertie expliquée par le plan en question.
+La fonction planFact détermine le plan factoriel sur lequel le visage test est le mieux représenté, ainsi que le pourcentage d'inertie.
+Elle prend en paramètre les valeurs des cosinus données par l'ACP.
+Elle renvoie une matrice présentant les dimensions des plans factoriels retenus ainsi que les pourcentages d'inertie expliquée par le plan en question.
 
 ```{r}
 planFact<-function(tab){
@@ -165,7 +166,7 @@ planFact<-function(tab){
 
 ```
 
-# Application de la fontion PlanF définie précédemment 
+### Application de la fontion PlanF définie précédemment 
 ```{r}
 cos<-acp$ind$cos2
 planF<-planFact(cos)
@@ -173,27 +174,40 @@ planF
 ```
 
 
-## Question 2.d (Sébastien Vingadessin) 
- 
+## Question 2.d (Sébastien Vingadessin)
+### Fonction qui, pour chaque visage test, représente graphiquement l’ensemble des visages de référence et le visage test en question sur le plan P
+
+Fonction graphTest
+Entrée: cord, matrice des coordonnées des points (donnée par l'ACP)
+Sortie: Aucune (affichage des graphiques)
 
 ```{r}
-coor<-acp$ind$coord
-
-for(p in 1:5){
-  x<-coor[,planF[1,p]]
-  x=c(x[1:10],coor[10+p,planF[1,p]])
-  y<-coor[,planF[2,p]]
-  y=c(y[1:10],coor[10+p,planF[2,p]])
-  
-  plot(x,y,type = "p")
+graphTest<-function(cord){
+  for(p in 1:5){
+    x<-cord[,planF[1,p]]
+    x=c(x[1:10],cord[10+p,planF[1,p]])
+    y<-cord[,planF[2,p]]
+    y=c(y[1:10],cord[10+p,planF[2,p]])
+    
+    plot(x,y,type = "p")
+  }
 }
+
+
+coor<-acp$ind$coord
+graphTest(coor)
 
 ```
 
 
 
 ## Question 2.e (Sébastien Vingadessin)
+### Fonction qui, pour chaque visage test, détermine le(s) visage(s) le(s) mieux représenté(s) parmi les plus proches du visage test au sens de la distance euclidienne
 
+
+Fonction distTest
+Entrée: cord, matrice des coordonnées des points (donnée par l'ACP)
+Sortie: Tableau donnant, pour chaque image test, l'image de référence la plus proche (au sens de la distance euclidienne)
 
 ```{r}
 distTest<-function(cord){
@@ -227,6 +241,11 @@ distTest(coor)
 
 
 ## Question 2.f (Ben yamine Mze Hamadi)
+### Fonction qui, pour chaque visage test, affiche simultanément le visage test et le(s) visage(s) identifié(s)
+
+Fonction identif
+Entrée: cord, matrice des coordonnées des points (donnée par l'ACP)
+Sortie: Aucune, affichage des visages (visage test suivi du visage identifié)
 
 ```{r}
 identif<-function(cord){
@@ -239,7 +258,7 @@ identif<-function(cord){
 }
 ```
 
-
+### Résultat:
 
 ```{r}
 identif(coor)
@@ -248,7 +267,7 @@ identif(coor)
 
 
 ## Question 3. (Ben yamine Mze Hamadi)
-
+### Classification ascendante hiérarchique (CAH) du projeté du nuage de visages sur le sous-espace principal Ek
 
 ```{r}
 #Nuage de point projeté
@@ -266,6 +285,11 @@ plot(h)
 ```
 
 
+### Fonction qui retourne la liste des classes (les éléments constitutifs de chaque classe) de la hiérarchie
+
+Fonction identif
+Entrée: cah, résultat de la classification ascendante hiérarchique effectuée précédemment
+Sortie: Liste des différentes classes de la classification
 
 ```{r}
 listClass<-function(cah){
@@ -292,6 +316,8 @@ listClass<-function(cah){
 ```
 
 
+### Liste des classes:
+
 ```{r}
 Lclass<-listClass(h)
 
@@ -300,7 +326,13 @@ Lclass
 
 
 
-## Question 4. (Sébastien Vingadessin) 
+## Question 4. (Sébastien Vingadessin)
+### Fonction qui, pour chaque visage test, détermine la plus petite classe non triviale contenant le visage test considéré
+
+Fonction pluspetiteClasse
+Entrée: listC, liste des classes de la CAH (résultat de la fonction Lclass)
+Sortie: liste de classes (pour chaque visage test, la plus petite classe non triviale le contenant)
+
 
 ```{r}
 pluspetiteClasse<-function(listC){
@@ -332,6 +364,12 @@ testClass
 
 
 ## Question 5 (Ben yamine Mze Hamadi et Sébastien Vingadessin)
+### Fonction qui, pour chaque visage test, affiche simultanément les visages de la plus petite classe déterminée à la question précédente
+
+Fonction visageClasse
+Entrée: tClass, liste de classes (résultat de la fonction pluspetiteClasse)
+Sortie: Aucune, affichage des visages (regroupés par classe, selon la variable tClass)
+
 
 ```{r}
 visageClasse<-function(tClass){
@@ -356,12 +394,6 @@ visageClasse<-function(tClass){
 
 visageClasse(testClass)
 ```
-
-
-
-
-
-
 
 
 
